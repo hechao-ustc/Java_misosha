@@ -2,6 +2,9 @@
 ## 项目简介
 通过SpringBoot快速搭建的前后端分离的电商基础秒杀项目。项目通过应用领域驱动型的分层模型设计方式去完成：用户otp注册、登陆、查看、商品列表、进入商品详情以及倒计时秒杀开始后下单购买的基本流程。
 
+## 系统结构
+系统使用了MVC的架构模式，各层之间的功能区分明显，对数据库的操作使用MySQL，运行在本地主机上。实际项目中的远程服务器和分布式缓存等本项目未使用。
+
 ## 使用到的外部依赖
 - org.springframework.boot:spring-boot-starter-web
 - mysql:mysql-connector-java
@@ -36,3 +39,20 @@
  
 
 - 使用聚合模型在itemModel加入PromoModel promoModel，若不为空表示其有未结束的秒杀活动；在orderModel中加入promoId，若不为空，则以秒杀方式下单
+
+## 一些问题
+- ItemVO和UserVO必须设置get和set方法，否则报错com.fasterxml.jackson.databind.exc.InvalidDefinitionException: No serializer found for class， 猜测是BeanUtils.copyProperties(itemModel, itemVO)，进行属性赋值时会用到get和set方法
+
+- 数据库字段名称确保没有空格，而且要与Mapper.xml中定义的一致
+
+- 在使用自增主键的表的insert方法中，在队形的XM文件加入 keyProperty="id" useGeneratedKeys="true"保证可以获取自增id。在createItem时候，ItemStockDO必须先获取tem表中的item_id
+
+- Java8 lambda表达式的应用
+
+- 在使用DOMapper设置自动装载时，使用@Autowired(required = false)，猜测是容器的加载顺序导致需要装载时该Bean还未生成
+
+- 在变量名的书写上注意完整正确，使用BeanUtils.copyProperties()方法，要求两个类其中的变量名称相同且类型相同，否则需要手动操作这些变量
+
+- MySQL5.6之后，设置datetime类型的默认值不能为 '00-00-00 00:00:00'，需设置为大于1000的年数
+
+- 相应的annotation记得加，如对应的@Service，否则可能无法自动装载
